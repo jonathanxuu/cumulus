@@ -48,8 +48,8 @@ sp-consensus = { git = "https://github.com/paritytech/substrate", branch = "polk
 sp-tracing = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.5" }
 
 # Cumulus dependencies
-cumulus-test-client = { path = "../../test/client" }
-cumulus-test-relay-sproof-builder = { path = "../../test/relay-sproof-builder" }
+# cumulus-test-client = { path = "../../test/client" }
+# cumulus-test-relay-sproof-builder = { path = "../../test/relay-sproof-builder" }
 
 [features]
 default = [ "std" ]

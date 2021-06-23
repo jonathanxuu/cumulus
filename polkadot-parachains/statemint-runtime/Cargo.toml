@@ -77,6 +77,7 @@ orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-li
 orml-xtokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library", default-features = false, branch = "master"}
 orml-xcm-support = { git = "https://github.com/open-web3-stack/open-runtime-module-library", default-features = false, branch = "master"}
 orml-unknown-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library", default-features = false, branch = "master"}
+orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library", default-features = false, branch = "master"}
 primitives = { package = "acala-primitives", path = "../primitives", default-features = false}
 
 
@@ -163,4 +164,5 @@ std = [
 	"orml-unknown-tokens/std",
 	"orml-traits/std",
 	"primitives/std",
+	"orml-currencies/std",
 ]

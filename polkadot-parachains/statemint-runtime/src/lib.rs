@@ -85,6 +85,8 @@ use xcm_builder::{
 use xcm_executor::{Config, XcmExecutor};
 use orml_traits::{create_median_value_data_provider, parameter_type_with_key, DataFeeder, DataProviderExtended};
 
+use orml_currencies::BasicCurrencyAdapter;
+
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
 /// of data like extrinsics, allowing for them to continue syncing the network through upgrades
@@ -325,6 +327,18 @@ impl orml_tokens::Config for Runtime {
 	type MaxLocks = MaxLocks;
 }
 
+parameter_types! {
+	pub const GetNativeCurrencyId: CurrencyId = CurrencyId::Token(TokenSymbol::DOT);
+}
+
+impl orml_currencies::Config for Runtime {
+	type Event = Event;
+	type MultiCurrency = Tokens;
+	type NativeCurrency = BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
+	// type NativeCurrency = ();
+	type GetNativeCurrencyId = GetNativeCurrencyId;
+	type WeightInfo = ();
+}
 
 parameter_types! {
 	// One storage item; key size 32, value size 8; .
@@ -743,6 +757,7 @@ construct_runtime!(
 		
 		TransactionPayment: pallet_transaction_payment::{Pallet, Storage} = 11,
 		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>} = 12,
+		Currencies: orml_currencies::{Pallet, Call, Event<T>},
 
 
 		// Collator support. the order of these 4 are important and shall not change.

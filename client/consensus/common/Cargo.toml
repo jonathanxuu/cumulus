@@ -37,10 +37,10 @@ sc-service = { git = "https://github.com/paritytech/substrate", branch = "polkad
 sc-cli = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.5" }
 
 # Cumulus dependencies
-cumulus-test-runtime = { path = "../../../test/runtime" }
-cumulus-test-client = { path = "../../../test/client" }
-cumulus-test-service = { path = "../../../test/service" }
-cumulus-primitives-core = { path = "../../../primitives/core" }
+# cumulus-test-runtime = { path = "../../../test/runtime" }
+# cumulus-test-client = { path = "../../../test/client" }
+# cumulus-test-service = { path = "../../../test/service" }
+# cumulus-primitives-core = { path = "../../../primitives/core" }
 
 # Polkadot deps
 polkadot-test-client = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.5" }
