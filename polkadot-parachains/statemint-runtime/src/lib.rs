@@ -24,7 +24,7 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 pub mod constants;
 mod weights;
-pub use primitives::{CurrencyId,TokenSymbol};
+// pub use primitives::{CurrencyId,TokenSymbol};
 
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
@@ -41,7 +41,6 @@ use sp_std::prelude::*;
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 
-use codec::{Decode, Encode};
 use constants::{currency::*, fee::WeightToFee};
 use frame_support::{
 	construct_runtime, match_type, parameter_types,
@@ -62,7 +61,6 @@ use statemint_common::{
 	impls::DealWithFees, AccountId, AuraId, Balance, BlockNumber, Hash, Header, Index, Signature,
 	AVERAGE_ON_INITIALIZE_RATIO, HOURS, MAXIMUM_BLOCK_WEIGHT, NORMAL_DISPATCH_RATIO, SLOT_DURATION,
 };
-use primitives::currency::TokenInfo;
 pub use primitives::Amount;
 // use runtime_common;
 pub use orml_xcm_support::{MultiNativeAsset};
@@ -86,11 +84,31 @@ use xcm_executor::{Config, XcmExecutor};
 use orml_traits::{create_median_value_data_provider, parameter_type_with_key, DataFeeder, DataProviderExtended};
 
 use orml_currencies::BasicCurrencyAdapter;
-
+use orml_xcm_support::{MultiCurrencyAdapter,IsNativeConcrete};
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
 /// of data like extrinsics, allowing for them to continue syncing the network through upgrades
 /// to even the core data structures.
+/// 
+ use codec::{Decode, Encode};
+#[cfg(feature = "std")]
+use serde::{Deserialize, Serialize};
+
+#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum CurrencyId {
+	Native,
+	ACA,
+	AUSD,
+	DOT,
+	LDOT,
+	RENBTC,
+	KAR,
+	KUSD,
+	KSM,
+	LKSM,
+}
+
 pub mod opaque {
 	use super::*;
 	pub use sp_runtime::OpaqueExtrinsic as UncheckedExtrinsic;
@@ -294,25 +312,31 @@ impl pallet_utility::Config for Runtime {
 	type WeightInfo = weights::pallet_utility::WeightInfo<Runtime>;
 }
 
+// parameter_type_with_key! {
+// 	pub ExistentialDeposits: |currency_id: CurrencyId| -> Balance {
+// 		match currency_id {
+// 			CurrencyId::Token(symbol) => match symbol {
+// 				// TokenSymbol::KUSD => 1*(*currency_id),
+// 				TokenSymbol::KUSD => 10u128.saturating_pow(currency_id.decimals().expect("Not support Erc20 decimals").into()),
+
+// 				TokenSymbol::KSM => 20u128.saturating_pow(currency_id.decimals().expect("Not support Erc20 decimals").into()),
+// 				TokenSymbol::LKSM => 30u128.saturating_pow(currency_id.decimals().expect("Not support Erc20 decimals").into()),
+
+// 				TokenSymbol::ACA | 
+// 				TokenSymbol::AUSD |
+// 				TokenSymbol::DOT |
+// 				TokenSymbol::LDOT |
+// 				TokenSymbol::RENBTC |
+// 				TokenSymbol::KAR => Default::default() // unsupported
+// 			},
+// 		CurrencyId::DexShare(_, _) => Default::default()
+// 		}
+// 	};
+// }
+
 parameter_type_with_key! {
-	pub ExistentialDeposits: |currency_id: CurrencyId| -> Balance {
-		match currency_id {
-			CurrencyId::Token(symbol) => match symbol {
-				// TokenSymbol::KUSD => 1*(*currency_id),
-				TokenSymbol::KUSD => 10u128.saturating_pow(currency_id.decimals().expect("Not support Erc20 decimals").into()),
-
-				TokenSymbol::KSM => 20u128.saturating_pow(currency_id.decimals().expect("Not support Erc20 decimals").into()),
-				TokenSymbol::LKSM => 30u128.saturating_pow(currency_id.decimals().expect("Not support Erc20 decimals").into()),
-
-				TokenSymbol::ACA |
-				TokenSymbol::AUSD |
-				TokenSymbol::DOT |
-				TokenSymbol::LDOT |
-				TokenSymbol::RENBTC |
-				TokenSymbol::KAR => Balance::max_value() // unsupported
-			},
-		CurrencyId::DexShare(_, _) =>Balance::max_value()
-		}
+	pub ExistentialDeposits: |_id: CurrencyId| -> Balance {
+		Default::default()
 	};
 }
 
@@ -321,14 +345,16 @@ impl orml_tokens::Config for Runtime {
 	type Balance = Balance;
 	type Amount = Amount;
 	type CurrencyId = CurrencyId;
-	type WeightInfo = weights::orml_tokens::WeightInfo<Runtime>;
+	type WeightInfo = ();
 	type ExistentialDeposits = ExistentialDeposits;
 	type OnDust = ();
 	type MaxLocks = MaxLocks;
 }
 
 parameter_types! {
-	pub const GetNativeCurrencyId: CurrencyId = CurrencyId::Token(TokenSymbol::DOT);
+	// pub const GetNativeCurrencyId: CurrencyId = CurrencyId::Token(TokenSymbol::DOT);
+	pub const GetNativeCurrencyId: CurrencyId = CurrencyId::Native;
+
 }
 
 impl orml_currencies::Config for Runtime {
@@ -487,18 +513,18 @@ pub type LocationToAccountId = (
 );
 
 /// Means for transacting assets on this chain.
-pub type LocalAssetTransactor = CurrencyAdapter<
-	// Use this currency:
-	Balances,
-	// Use this currency when it is a fungible asset matching the given location or name:
-	IsConcrete<DotLocation>,
-	// Do a simple punn to convert an AccountId32 MultiLocation into a native chain account ID:
-	LocationToAccountId,
-	// Our chain's account ID type (we can't get away without mentioning it explicitly):
-	AccountId,
-	// We don't track any teleports.
-	(),
->;
+// pub type LocalAssetTransactor = CurrencyAdapter<
+// 	// Use this currency:
+// 	Balances,
+// 	// Use this currency when it is a fungible asset matching the given location or name:
+// 	IsConcrete<DotLocation>,
+// 	// Do a simple punn to convert an AccountId32 MultiLocation into a native chain account ID:
+// 	LocationToAccountId,
+// 	// Our chain's account ID type (we can't get away without mentioning it explicitly):
+// 	AccountId,
+// 	// We don't track any teleports.
+// 	(),
+// >;
 
 /// This is the type we use to convert an (incoming) XCM origin into a local `Origin` instance,
 /// ready for dispatching a transaction with Xcm's `Transact`. There is an `OriginKind` which can
@@ -605,7 +631,15 @@ impl cumulus_pallet_dmp_queue::Config for Runtime {
 }
 
 // TODO: add pub type LocalAssetTransactor
-
+pub type LocalAssetTransactor = MultiCurrencyAdapter<
+	Currencies,
+	UnknownTokens,
+	IsNativeConcrete<CurrencyId, CurrencyIdConvert>,
+	AccountId,
+	LocationToAccountId,
+	CurrencyId,
+	CurrencyIdConvert,
+>;
 
 fn native_currency_location(id: CurrencyId) -> MultiLocation {
 	X3(Parent, Parachain(ParachainInfo::parachain_id().into()), GeneralKey(id.encode()))
@@ -614,27 +648,34 @@ fn native_currency_location(id: CurrencyId) -> MultiLocation {
 pub struct CurrencyIdConvert;
 impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
 	fn convert(id: CurrencyId) -> Option<MultiLocation> {
-		use CurrencyId::Token;
-		use TokenSymbol::*;
+		// use CurrencyId::Token;
+		// use TokenSymbol::*;
 		match id {
-			Token(KSM) => Some(X1(Parent)),
-			Token(KAR) | Token(KUSD) | Token(LKSM) | Token(RENBTC) => Some(native_currency_location(id)),
+			CurrencyId::KSM => Some(X1(Parent)),
+			// Token(KSM) => Some(X1(Parent)),
+			CurrencyId::KAR | CurrencyId::KUSD | CurrencyId::LKSM | CurrencyId::RENBTC => Some(native_currency_location(id)),
+
+			// Token(KAR) | Token(KUSD) | Token(LKSM) | Token(RENBTC) => Some(native_currency_location(id)),
 			_ => None,
 		}
 	}
 }
 impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
 	fn convert(location: MultiLocation) -> Option<CurrencyId> {
-		use CurrencyId::Token;
-		use TokenSymbol::*;
+		// use CurrencyId::Token;
+		// use TokenSymbol::*;
 		match location {
-			X1(Parent) => Some(Token(KSM)),
+			// X1(Parent) => Some(Token(KSM)),
+			X1(Parent) => Some(CurrencyId::KSM),
+
 			X3(Parent, Parachain(id), GeneralKey(key)) if ParaId::from(id) == ParachainInfo::parachain_id().into() => {
 				// decode the general key
 				if let Ok(currency_id) = CurrencyId::decode(&mut &key[..]) {
 					// check `currency_id` is cross-chain asset
 					match currency_id {
-						Token(KAR) | Token(KUSD) | Token(LKSM) | Token(RENBTC) => Some(currency_id),
+						// Token(KAR) | Token(KUSD) | Token(LKSM) | Token(RENBTC) => Some(currency_id),
+						CurrencyId::KAR | CurrencyId::KUSD | CurrencyId::LKSM | CurrencyId::RENBTC => Some(currency_id),
+
 						_ => None,
 					}
 				} else {
@@ -929,6 +970,7 @@ impl_runtime_apis! {
 			config: frame_benchmarking::BenchmarkConfig
 		) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
 			use frame_benchmarking::{Benchmarking, BenchmarkBatch, add_benchmark, TrackedStorageKey};
+
 
 			use cumulus_pallet_session_benchmarking::Pallet as SessionBench;
 			use frame_system_benchmarking::Pallet as SystemBench;

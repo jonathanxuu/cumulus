@@ -22,7 +22,7 @@ use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
-use statemint_runtime::TokensConfig;
+use statemint_runtime::{TokensConfig,CurrencyId};
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<rococo_parachain_runtime::GenesisConfig, Extensions>;
@@ -352,7 +352,12 @@ fn statemint_genesis(
 				.map(|k| (k, STATEMINT_ED * 4096))
 				.collect(),
 		},
-		tokens: TokensConfig { balances: vec![] },
+		tokens: TokensConfig { 
+			balances: endowed_accounts.iter().cloned().map(|k| (k, CurrencyId::DOT, STATEMINT_ED * 4096)).collect(),
+			// balances: endowed_accounts.iter().cloned().map(|acc| (acc, CurrencyId::DOT, 1 << 50)).collect(),
+
+			// balances: vec![] 
+		},
 		parachain_info: statemint_runtime::ParachainInfoConfig { parachain_id: id },
 		collator_selection: statemint_runtime::CollatorSelectionConfig {
 			invulnerables: invulnerables.iter().cloned().map(|(acc, _)| acc).collect(),
