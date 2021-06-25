@@ -97,7 +97,6 @@ use serde::{Deserialize, Serialize};
 #[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum CurrencyId {
-	Native,
 	ACA,
 	AUSD,
 	DOT,
@@ -355,7 +354,7 @@ impl orml_tokens::Config for Runtime {
 
 parameter_types! {
 	// pub const GetNativeCurrencyId: CurrencyId = CurrencyId::Token(TokenSymbol::DOT);
-	pub const GetNativeCurrencyId: CurrencyId = CurrencyId::Native;
+	pub const GetNativeCurrencyId: CurrencyId = CurrencyId::XXXX;
 
 }
 
