@@ -107,6 +107,8 @@ pub enum CurrencyId {
 	KUSD,
 	KSM,
 	LKSM,
+	XXXX,
+	YYYY,
 }
 
 pub mod opaque {
@@ -653,7 +655,7 @@ impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
 		match id {
 			CurrencyId::KSM => Some(X1(Parent)),
 			// Token(KSM) => Some(X1(Parent)),
-			CurrencyId::KAR | CurrencyId::KUSD | CurrencyId::LKSM | CurrencyId::RENBTC => Some(native_currency_location(id)),
+			CurrencyId::KAR | CurrencyId::KUSD | CurrencyId::LKSM | CurrencyId::RENBTC | CurrencyId::XXXX | CurrencyId::YYYY => Some(native_currency_location(id)),
 
 			// Token(KAR) | Token(KUSD) | Token(LKSM) | Token(RENBTC) => Some(native_currency_location(id)),
 			_ => None,
@@ -674,7 +676,7 @@ impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
 					// check `currency_id` is cross-chain asset
 					match currency_id {
 						// Token(KAR) | Token(KUSD) | Token(LKSM) | Token(RENBTC) => Some(currency_id),
-						CurrencyId::KAR | CurrencyId::KUSD | CurrencyId::LKSM | CurrencyId::RENBTC => Some(currency_id),
+						CurrencyId::KAR | CurrencyId::KUSD | CurrencyId::LKSM | CurrencyId::RENBTC | CurrencyId::XXXX | CurrencyId::YYYY => Some(currency_id),
 
 						_ => None,
 					}

@@ -284,7 +284,7 @@ pub fn statemint_development_config(id: ParaId) -> StatemintChainSpec {
 
 pub fn statemint_local_config(id: ParaId) -> StatemintChainSpec {
 	let mut properties = sc_chain_spec::Properties::new();
-	properties.insert("tokenSymbol".into(), "DOT".into());
+	properties.insert("tokenSymbol".into(), "XXXX".into());
 	properties.insert("tokenDecimals".into(), 10.into());
 
 	StatemintChainSpec::from_genesis(
@@ -353,7 +353,7 @@ fn statemint_genesis(
 				.collect(),
 		},
 		tokens: TokensConfig { 
-			balances: endowed_accounts.iter().cloned().map(|k| (k, CurrencyId::DOT, STATEMINT_ED * 4096)).collect(),
+			balances: endowed_accounts.iter().cloned().map(|k| (k, CurrencyId::XXXX, STATEMINT_ED * 4096)).collect(),
 			// balances: endowed_accounts.iter().cloned().map(|acc| (acc, CurrencyId::DOT, 1 << 50)).collect(),
 
 			// balances: vec![] 
