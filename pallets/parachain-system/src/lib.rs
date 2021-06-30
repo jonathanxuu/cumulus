@@ -53,6 +53,8 @@ use sp_runtime::{
 	},
 };
 use sp_std::{cmp, collections::btree_map::BTreeMap, prelude::*};
+const LOG_TARGET: &str = "parachain-system-lib";
+use codec::Decode;
 
 mod relay_state_snapshot;
 #[macro_use]
@@ -306,6 +308,9 @@ pub mod pallet {
 			origin: OriginFor<T>,
 			data: ParachainInherentData,
 		) -> DispatchResultWithPostInfo {
+			log::debug!(target:"xcm","im in set_validation_data");
+			log::debug!(target:"xcm","im in set_validation_data,data is {:?}",data.clone());
+
 			ensure_none(origin)?;
 			assert!(
 				!<ValidationData<T>>::exists(),
@@ -318,8 +323,10 @@ pub mod pallet {
 				downward_messages,
 				horizontal_messages,
 			} = data;
+			log::debug!(target:"xcm","im in set_validation_data2 horizontal_message is {:?}",horizontal_messages.clone());
 
 			Self::validate_validation_data(&vfp);
+			log::debug!(target:"xcm","im in set_validation_data3");
 
 			// initialization logic: we know that this runs exactly once every block,
 			// which means we can put the initialization logic here to remove the
@@ -333,6 +340,7 @@ pub mod pallet {
 					Self::deposit_event(Event::ValidationFunctionApplied(vfp.relay_parent_number));
 				}
 			}
+			log::debug!(target:"xcm","im in set_validation_data4");
 
 			let relay_state_proof = RelayChainStateProof::new(
 				T::SelfParaId::get(),
@@ -340,16 +348,24 @@ pub mod pallet {
 				relay_chain_state,
 			)
 			.expect("Invalid relay chain state proof");
+			log::debug!(target:"xcm","im in set_validation_data5");
 
 			let host_config = relay_state_proof
 				.read_abridged_host_configuration()
 				.expect("Invalid host configuration in relay chain state proof");
+			log::debug!(target:"xcm","im in set_validation_data6,relay_state_proof is {:?}",relay_state_proof);
+
 			let relevant_messaging_state = relay_state_proof
 				.read_messaging_state_snapshot()
 				.expect("Invalid messaging state in relay chain state proof");
+			log::debug!(target:"xcm","im in set_validation_data6,relevant_messaging_state is {:?}",relevant_messaging_state.clone());
 
 			<ValidationData<T>>::put(&vfp);
+			log::debug!(target:"xcm","im in set_validation_data7");
+
 			<RelevantMessagingState<T>>::put(relevant_messaging_state.clone());
+			log::debug!(target:"xcm","im in set_validation_data8");
+
 			<HostConfiguration<T>>::put(host_config);
 
 			<T::OnValidationData as OnValidationData>::on_validation_data(&vfp);
@@ -672,9 +688,38 @@ impl<T: Config> GetChannelInfo for Pallet<T> {
 	}
 
 	fn get_channel_max(id: ParaId) -> Option<usize> {
+
+		log::debug!(target:"xcm","im in get_channel_max 123456");
 		let channels = Self::relevant_messaging_state()?.egress_channels;
-		let index = channels.binary_search_by_key(&id, |item| item.0).ok()?;
-		Some(channels[index].1.max_message_size as usize)
+		log::debug!(target:"xcm","im in get_channel_max 4566,channel is {:?}",channels.clone());
+	
+
+		let egress_channels = Self::relevant_messaging_state()?.egress_channels;
+	
+
+		// let new_c = egress_channels
+		// .map(|raw| <Vec<ParaId>>::decode(&mut &raw[..]))
+		// .transpose()
+		// .map_err(|e| {
+		// 	tracing::error!(
+		// 		target: LOG_TARGET,
+		// 		error = ?e,
+		// 		"Cannot decode the hrmp egress channel index.",
+		// 	)
+		// })
+		// .ok()?
+		// .unwrap_or_default();
+		// log::debug!(target:"xcm","egress is {:?}",egress_channels);
+		log::debug!(target:"xcm","im before user-set 1024");
+
+		// let index = channels.binary_search_by_key(&id, |item| item.0).ok()?;
+
+		// log::debug!(target:"xcm","im in get_channel_max, index is {:?}",index.clone());
+		log::debug!(target:"xcm","im after user-set 1024");
+		Some(channels[0].1.max_message_size as usize)
+
+		// Some(channels[index].1.max_message_size as usize)
+		// Some(80 as usize)
 	}
 }
 

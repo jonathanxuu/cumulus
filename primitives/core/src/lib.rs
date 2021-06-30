@@ -60,7 +60,8 @@ impl From<MessageSendError> for &'static str {
 		use MessageSendError::*;
 		match e {
 			QueueFull => "QueueFull",
-			NoChannel => "NoChannel",
+			NoChannel => {	log::debug!(target:"xcm","send_fragment222,nochannel!!!!!");
+			"NoChannel"},
 			TooBig => "TooBig",
 			Other => "Other",
 		}
@@ -137,7 +138,8 @@ pub trait UpwardMessageSender {
 }
 impl UpwardMessageSender for () {
 	fn send_upward_message(_msg: UpwardMessage) -> Result<u32, MessageSendError> {
-		Err(MessageSendError::NoChannel)
+		{	log::debug!(target:"xcm","send_fragment333,nochannel!!!!!");
+		Err(MessageSendError::NoChannel)}
 	}
 }
 

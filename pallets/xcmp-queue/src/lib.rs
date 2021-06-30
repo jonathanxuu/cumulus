@@ -103,7 +103,8 @@ pub mod pallet {
 		/// An upward message was sent to the relay chain.
 		UpwardMessageSent(Option<T::Hash>),
 		/// An HRMP message was sent to a sibling parachain.
-		XcmpMessageSent(Option<T::Hash>),
+		XcmpMessageSent(T::Hash),
+		//我
 	}
 
 	#[pallet::error]
@@ -241,10 +242,13 @@ impl<T: Config> Pallet<T> {
 		fragment: Fragment,
 	) -> Result<u32, MessageSendError> {
 		let data = fragment.encode();
-
+		log::debug!(target:"xcm","data.len ={:?}",data.len());
 		// Optimization note: `max_message_size` could potentially be stored in
 		// `OutboundXcmpMessages` once known; that way it's only accessed when a new page is needed.
+		log::debug!(target:"xcm","send_fragment111,nochannel!!!!!");
+		log::debug!(target:"xcm","get_channel_max ={:?}",T::ChannelInfo::get_channel_max(recipient));
 
+		
 		let max_message_size =
 			T::ChannelInfo::get_channel_max(recipient).ok_or(MessageSendError::NoChannel)?;
 		if data.len() > max_message_size {
@@ -770,7 +774,9 @@ impl<T: Config> XcmpMessageSource for Pallet<T> {
 		let pruned = old_statuses_len - statuses.len();
 		// removing an item from status implies a message being sent, so the result messages must
 		// be no less than the pruned channels.
-		statuses.rotate_left(result.len() - pruned);
+		if result.len() > pruned {
+			statuses.rotate_left(result.len() - pruned);
+		}
 
 		<OutboundXcmpStatus<T>>::put(statuses);
 
@@ -781,18 +787,28 @@ impl<T: Config> XcmpMessageSource for Pallet<T> {
 /// Xcm sender for sending to a sibling parachain.
 impl<T: Config> SendXcm for Pallet<T> {
 	fn send_xcm(dest: MultiLocation, msg: Xcm<()>) -> Result<(), XcmError> {
+		log::debug!(target:"xcm","im in send_xcm 1111,dest is {:?},msg is {:?}",dest.clone(),msg.clone());
 		match &dest {
 			// An HRMP message for a sibling parachain.
 			MultiLocation::X2(Junction::Parent, Junction::Parachain(id)) => {
 				let msg = VersionedXcm::<()>::from(msg);
+				log::debug!(target:"xcm","im in send_xcm 1111,versionedXcm is {:?}",msg.clone());
+
 				let hash = T::Hashing::hash_of(&msg);
+				log::debug!(target:"xcm","im in send_xcm 1111,hash is {:?}",hash.clone());
+
 				Self::send_fragment(
 					(*id).into(),
 					XcmpMessageFormat::ConcatenatedVersionedXcm,
-					msg,
+					msg.clone(),
 				)
 				.map_err(|e| XcmError::SendFailed(<&'static str>::from(e)))?;
-				Self::deposit_event(Event::XcmpMessageSent(Some(hash)));
+				Self::deposit_event(Event::XcmpMessageSent(hash.clone()));
+		
+
+
+				log::debug!(target:"xcm","im in send_xcm 1111,hashhhhhh is {:?}",hash.clone());
+
 				Ok(())
 			}
 			// Anything else is unhandled. This includes a message this is meant for us.

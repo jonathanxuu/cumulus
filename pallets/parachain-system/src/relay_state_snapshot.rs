@@ -29,7 +29,7 @@ use sp_trie::StorageProof;
 /// This data is essential for making sure that the parachain is aware of current resource use on
 /// the relay chain and that the candidates produced for this parachain do not exceed any of these
 /// limits.
-#[derive(Clone, Encode, Decode)]
+#[derive(Clone, Encode, Decode, Debug)]
 pub struct MessagingStateSnapshot {
 	/// The current message queue chain head for downward message queue.
 	///
@@ -112,6 +112,7 @@ where
 /// A state proof extracted from the relay chain.
 ///
 /// This state proof is extracted from the relay chain block we are building on top of.
+#[derive(Debug)]
 pub struct RelayChainStateProof {
 	para_id: ParaId,
 	trie_backend: TrieBackend<MemoryDB<HashFor<relay_chain::Block>>, HashFor<relay_chain::Block>>,

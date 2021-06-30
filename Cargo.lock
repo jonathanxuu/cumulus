@@ -1692,6 +1692,7 @@ dependencies = [
  "sp-tracing 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.5)",
  "sp-trie 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.5)",
  "sp-version 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.5)",
+ "tracing",
  "xcm",
 ]
 
@@ -1793,6 +1794,7 @@ version = "0.1.0"
 dependencies = [
  "frame-support 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.5)",
  "impl-trait-for-tuples",
+ "log",
  "parity-scale-codec",
  "polkadot-core-primitives",
  "polkadot-parachain",
