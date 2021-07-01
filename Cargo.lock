@@ -13617,6 +13617,7 @@ dependencies = [
  "frame-support 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.5)",
  "frame-system 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.5)",
  "impl-trait-for-tuples",
+ "log",
  "pallet-transaction-payment",
  "parity-scale-codec",
  "polkadot-parachain",
