@@ -362,7 +362,7 @@ impl<T: Config> Pallet<T> {
 		let (result, event) = match Xcm::<T::Call>::try_from(xcm) {
 			Ok(xcm) => {
 				let location = (Junction::Parent, Junction::Parachain(sender.into()));
-				match T::XcmExecutor::execute_xcm(location.into(), xcm, max_weight) {
+				match T::XcmExecutor::execute_xcm_in_credit(location.into(), xcm, max_weight,max_weight) {
 					Outcome::Error(e) => (Err(e.clone()), Event::Fail(Some(hash), e)),
 					Outcome::Complete(w) => (Ok(w), Event::Success(Some(hash))),
 					// As far as the caller is concerned, this was dispatched without error, so

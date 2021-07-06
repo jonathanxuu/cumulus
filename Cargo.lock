@@ -5386,6 +5386,7 @@ name = "orml-xcm-support"
 version = "0.4.1-dev"
 dependencies = [
  "frame-support 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.5)",
+ "log",
  "orml-traits",
  "parity-scale-codec",
  "sp-runtime 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.5)",
